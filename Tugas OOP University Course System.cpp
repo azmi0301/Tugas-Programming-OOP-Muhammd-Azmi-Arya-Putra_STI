@@ -1,68 +1,88 @@
 #include <iostream>
-using namespace std;
+#include <vector>
+#include <string>
+#include <iomanip>
 
-class Product {
+class Mahasiswa;
+
+class Kursus {
 private:
-    int id;
-    string name;
-    double price;
-    int stock;
-    string category;
-
+    std::string nama;
+    int kapasitas_maks;
+    std::vector<Mahasiswa*> daftar_mahasiswa;
+    std::vector<Mahasiswa*> daftar_gagal;
 public:
-    Product(int id, string name, double price, int stock, string category)
-        : id(id), name(name), price(price), stock(stock), category(category) {}
+    Kursus(std::string nama, int kapasitas) : nama(nama), kapasitas_maks(kapasitas) {}
 
-    void updatePrice(double new_price) {
-        if (new_price < 0) {
-            cout << "Harga tidak bisa negatif!" << endl;
-            return;
-        }
-        price = new_price;
-    }
-
-    void updateStock(int quantity) {
-        if (stock + quantity < 0) {
-            cout << "Stok tidak cukup!" << endl;
-            return;
-        }
-        stock += quantity;
-    }
-
-    double applyPercentageDiscount(double discount_percentage) {
-        if (discount_percentage < 0 || discount_percentage > 100) {
-            throw invalid_argument("Persentase diskon harus antara 0 dan 100");
-        }
-        return price * (1 - discount_percentage / 100);
-    }
-
-    double applyFixedDiscount(double discount_amount) {
-        if (discount_amount < 0 || discount_amount > price) {
-            throw invalid_argument("Diskon tidak valid!");
-        }
-        return price - discount_amount;
-    }
-
-    void displayInfo() {
-        cout << "ID: " << id << endl;
-        cout << "Nama: " << name << endl;
-        cout << "Harga: " << price << endl;
-        cout << "Stok: " << stock << endl;
-        cout << "Kategori: " << category << endl;
-    }
+    bool daftarMahasiswa(Mahasiswa* mahasiswa);
+    void tampilkanMahasiswa();
+    void tampilkanMahasiswaGagal();
+    std::string getNama() { return nama; }
 };
 
+class Mahasiswa {
+private:
+    std::string nama;
+public:
+    Mahasiswa(std::string nama) : nama(nama) {}
+    std::string getNama() { return nama; }
+};
+
+bool Kursus::daftarMahasiswa(Mahasiswa* mahasiswa) {
+    if (daftar_mahasiswa.size() < kapasitas_maks) {
+        daftar_mahasiswa.push_back(mahasiswa);
+        std::cout << "[SUKSES] " << mahasiswa->getNama() << " berhasil terdaftar di " << nama << "\n";
+        return true;
+    }
+    else {
+        std::cout << "[GAGAL] " << mahasiswa->getNama() << " tidak dapat mendaftar ke " << nama << " karena sudah penuh.\n";
+        daftar_gagal.push_back(mahasiswa);
+        return false;
+    }
+}
+
+void Kursus::tampilkanMahasiswa() {
+    std::cout << "\n=== Mahasiswa Terdaftar di " << nama << " ===\n";
+    if (daftar_mahasiswa.empty()) {
+        std::cout << "Tidak ada mahasiswa yang terdaftar.\n";
+    }
+    else {
+        for (size_t i = 0; i < daftar_mahasiswa.size(); i++) {
+            std::cout << i + 1 << ". " << daftar_mahasiswa[i]->getNama() << "\n";
+        }
+    }
+    std::cout << "===============================\n";
+}
+
+void Kursus::tampilkanMahasiswaGagal() {
+    std::cout << "\n=== Mahasiswa Gagal Mendaftar di " << nama << " ===\n";
+    if (daftar_gagal.empty()) {
+        std::cout << "Tidak ada mahasiswa yang gagal mendaftar.\n";
+    }
+    else {
+        for (size_t i = 0; i < daftar_gagal.size(); i++) {
+            std::cout << i + 1 << ". " << daftar_gagal[i]->getNama() << "\n";
+        }
+    }
+    std::cout << "===============================\n";
+}
+
 int main() {
-    Product product1(1, "Laptop", 1000, 10, "Elektronik");
-    product1.displayInfo();
+    Kursus kursus("Pemrograman C++", 3);
 
-    // Menggunakan diskon persentase
-    double discounted_price1 = product1.applyPercentageDiscount(15);
-    cout << "Harga setelah diskon 15%: " << discounted_price1 << endl;
+    Mahasiswa mhs1("azmi");
+    Mahasiswa mhs2("gathan");
+    Mahasiswa mhs3("umar");
+    Mahasiswa mhs4("ariesta"); 
 
-    // Menggunakan diskon tetap
-    double discounted_price2 = product1.applyFixedDiscount(200);
-    cout << "Harga setelah diskon tetap 200: " << discounted_price2 << endl;
+    std::cout << "\n=== Proses Pendaftaran ===\n";
+    kursus.daftarMahasiswa(&mhs1);
+    kursus.daftarMahasiswa(&mhs2);
+    kursus.daftarMahasiswa(&mhs3);
+    kursus.daftarMahasiswa(&mhs4); 
+
+    kursus.tampilkanMahasiswa();
+    kursus.tampilkanMahasiswaGagal();
 
     return 0;
 }
